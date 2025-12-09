@@ -17,33 +17,28 @@
 
 import asyncio
 
-from systemd_ctypes import Bus, EventLoopPolicy, introspection
+from systemd_ctypes import Bus, EventLoopPolicy
 
+def signal_callback(message):
+    print("signal", message.get_body())
+    return True
 
 def property_changed(message):
-    print('Property changed:', message.get_body())
-    return 0
-
+    print("property changed", message.get_body())
+    return True
 
 async def main():
     system = Bus.default_system()
-
-    xml, = system.call_method('org.freedesktop.hostname1',
-                              '/org/freedesktop/hostname1',
-                              'org.freedesktop.DBus.Introspectable',
-                              'Introspect')
-    print(introspection.parse_xml(xml))
-
-    items, = await system.call_method_async('org.freedesktop.hostname1',
-                                            '/org/freedesktop/hostname1',
-                                            'org.freedesktop.DBus.Properties',
-                                            'GetAll',
-                                            's', 'org.freedesktop.hostname1')
-    print(items)
-
-    slot = system.add_match("interface='org.freedesktop.DBus.Properties'", property_changed)
-    await asyncio.sleep(1000)
-    del slot
+    x = system.match_signal(signal_callback)
+    print(x)
+    slot1 = system.add_match("interface='org.freedesktop.DBus.Properties'", property_changed)
+    slot2 = system.add_match("interface='org.freedesktop.DBus.Properties'", property_changed)
+    await asyncio.sleep(500)
+    print("canelling slot1")
+    slot1.cancel()
+    print("canelled slot1")
+    await asyncio.sleep(2000)
+    print(slot2)
 
 
 asyncio.set_event_loop_policy(EventLoopPolicy())

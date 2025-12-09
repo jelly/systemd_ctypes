@@ -383,6 +383,11 @@ class Bus(libsystemd.sd_bus):
         self._add_match(byref(slot), rule, slot.trampoline, slot.userdata)
         return slot
 
+    def match_signal(self, handler: Callable[[BusMessage], bool]) -> Slot:
+        slot = Slot(handler)
+        self._match_signal(byref(slot), None, None, None, None, slot.trampoline, slot.userdata)
+        return slot
+
     def add_object(self, path: str, obj: 'BaseObject') -> Slot:
         slot = Slot(obj.message_received)
         self._add_object(byref(slot), path, slot.trampoline, slot.userdata)

@@ -273,6 +273,18 @@ class sd_bus(ReferenceType):
     def get_fd(self: 'sd_bus') -> Union[int, Errno]:
         raise NotImplementedError
 
+    def _match_signal(
+        self: 'sd_bus',
+        slot: Reference[sd_bus_slot],
+        sender: Optional[str],
+        path: Optional[str],
+        interface: Optional[str],
+        member: Optional[str],
+        callback: Callback,
+        user_data: UserData,
+    ) -> Union[None, Errno]:
+        ...
+
     def _message_new_method_call(
         self: 'sd_bus',
         message: Reference[sd_bus_message],
